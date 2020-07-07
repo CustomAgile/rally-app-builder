@@ -52,7 +52,7 @@
     "test": "mocha --trace-deprecation -t 20000"
   },
   "bin": {
-    "rally-app-builder": "./bin/rally-app-builder",
-    "rab": "./bin/rally-app-builder"
+    "rally-app-builder-ca": "./bin/rally-app-builder",
+    "rab-ca": "./bin/rally-app-builder"
   }
 }
