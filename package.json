@@ -1,12 +1,12 @@
 {
-  "author": "Kyle Morse <morky01@ca.com>",
-  "name": "rally-app-builder",
+  "author": "Custom Agile",
+  "name": "rally-app-builder-ca",
   "description": "A node module that assists in the building of Rally Apps",
-  "version": "2.1.1",
-  "homepage": "https://github.com/rallyapps/rally-app-builder",
+  "version": "2.1.2",
+  "homepage": "https://github.com/CustomAgile/rally-app-builder",
   "repository": {
     "type": "git",
-    "url": "git://github.com/rallyapps/rally-app-builder.git"
+    "url": "git://github.com/CustomAgile/rally-app-builder.git"
   },
   "license": "MIT",
   "main": "index",
