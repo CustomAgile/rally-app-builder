@@ -7,9 +7,7 @@ Ext.define('CustomApp', {
         align: 'stretch'
     },
 
-    config: {
-        defaultSettings: {},
-    },
+    config: { defaultSettings: {} },
 
     items: [{
         id: Utils.AncestorPiAppFilter.RENDER_AREA_ID,
@@ -42,15 +40,13 @@ Ext.define('CustomApp', {
         this.addFilters();
     },
 
+    // Multi-level filters may not be necessary. If so, remove this code as well as
+    // the dependency in package.json then run `npm update` to remove from the project
     addFilters() {
         this.ancestorFilterPlugin = Ext.create('Utils.AncestorPiAppFilter', {
             ptype: 'UtilsAncestorPiAppFilter',
             pluginId: 'ancestorFilterPlugin',
-            settingsConfig: {
-                labelWidth: 225
-            },
-            whiteListFields: ['Tags', 'Milestones', 'c_EnterpriseApprovalEA', 'c_EAEpic', 'DisplayColor'],
-            filtersHidden: false,
+            settingsConfig: { labelWidth: 225 },
             displayMultiLevelFilter: true,
             visibleTab: 'HierarchicalRequirement',
             projectScope: 'user',
@@ -77,6 +73,7 @@ Ext.define('CustomApp', {
 
         try {
             let filters = await this.ancestorFilterPlugin.getAllFiltersForType('HierarchicalRequirement', true);
+            console.log(filters);
         } catch (e) {
             this.showError(e);
             this.setLoading(false);
@@ -146,7 +143,8 @@ Ext.define('CustomApp', {
                 failure(error) {
                     Rally.getApp().setLoading(false);
                     reject(error);
-                }
+                },
+                scope: this
             });
         });
     },
