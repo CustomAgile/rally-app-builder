@@ -128,6 +128,9 @@ Ext.define('CustomApp', {
         if (e.exceptions && e.exceptions.length && e.exceptions[0].error) {
             return e.exceptions[0].error.statusText;
         }
+        if (e.exception && e.error && typeof e.error.statusText === 'string' && !e.error.statusText.length && e.error.status && e.error.status === 524) {
+            return 'The server request has timed out';
+        }
         return defaultMessage;
     },
 
