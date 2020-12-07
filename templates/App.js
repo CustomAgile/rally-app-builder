@@ -91,7 +91,8 @@ Ext.define('CustomApp', {
             autoLoad: false,
             context,
             filters: [],
-            fetch: ['Name']
+            fetch: ['Name'],
+            enablePostGet: true,
         });
 
         return this.wrap(store.load());
