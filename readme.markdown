@@ -6,11 +6,11 @@ Rally App Builder is a [Node.js](http://nodejs.org/) command line utility for bu
 
 Rally App Builder is most easily used when installed globally:
 
-`npm i -g CustomAgile/rally-app-builder#master`
+`npm i -g rally-app-builder-ca`
 
 However, if that does't work (permission errors, etc.) it can be installed locally as well:
 
-`npm i CustomAgile/rally-app-builder#master`
+`npm i rally-app-builder-ca`
 
 ## API
 
