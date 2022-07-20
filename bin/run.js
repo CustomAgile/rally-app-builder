@@ -1,8 +1,5 @@
-let fs = require('fs');
-let path = require('path');
 let yargs = require('yargs');
 let RallyAppBuilder = require("../lib/");
-let npm = require('npm');
 
 let errorHandler = function (error) {
   if (error) {
@@ -19,29 +16,6 @@ let build = function (args) {
   return RallyAppBuilder.build({ templates }, errorHandler);
 };
 
-let npmInstall = function (callback) {
-  console.log('** Installing App Dependencies **');
-
-  return npm.load(function (err) {
-    if (err) {
-      return errorHandler(err);
-    }
-
-    npm.on('log', function (message) {
-      console.log(message);
-    });
-
-    npm.commands.install([], function (er, data) {
-      if (er) {
-        return errorHandler(er);
-      }
-      console.log(data);
-      return callback();
-    });
-
-  })
-};
-
 let init = function (args) {
   let { name, sdk, server, templates } = args;
   name = args._[1] || name;
@@ -54,19 +28,16 @@ let init = function (args) {
       if (error) {
         return errorHandler(error);
       } else {
-        return npmInstall(function () {
-          return build({ templates });
-        });
-        // console.log('Initialization complete. Run "npm install" and "rab-ca build" to complete the process');
-        // return build({templates});
+        console.log('Initialization complete. Run "npm install" and "rab-ca build" to complete the process');
+        return;
       }
     });
 };
 
 
 let watch = function (args) {
-  let { templates, ci } = args;
-  return RallyAppBuilder.watch({ templates, ci });
+  let { templates } = args;
+  return RallyAppBuilder.watch({ templates });
 };
 
 let run = function (args) {
@@ -100,24 +71,15 @@ yargs
   .command(
     'watch',
     'Watch the current app files for changes and automatically rebuild it.', {
-    templates: { alias: 't', describe: 'The path containing custom html output templates (advanced)' },
-    ci: { alias: 'c', describe: 'Also run the tests on each change after rebuilding the app' }
-  }
-    , watch
+    templates: { alias: 't', describe: 'The path containing custom html output templates (advanced)' }
+  },
+    watch
   )
   .command(
     'run',
     'Start a local server and launch the current app in the default browser.',
     { port: { alias: 'p', default: 1337, describe: 'The port on which to start the local http server' } }
     , run
-  )
-  .command(
-    'test',
-    'Run the tests for the current app.', {
-    debug: { alias: 'd', describe: 'If specified tests will be run in the default browser rather than headlessly.' },
-    spec: { alias: 's', describe: 'Specific test file name or glob pattern to run.  If not specified all tests will be run.' }
-  }
-    , test
   )
   .help().alias('h', 'help')
   .version().alias('v', 'version')

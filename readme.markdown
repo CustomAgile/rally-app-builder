@@ -30,9 +30,6 @@ However, if that does't work (permission errors, etc.) it can be installed local
     watch [--templates] [--ci]
     Automatically builds the App when files are changed
 
-    test [--debug] [--spec]
-    Runs the App tests
-
   Options:
 
     -h, --help     output usage information
@@ -85,17 +82,18 @@ By default the server listens on port 1337.  This can be changed as follows:
 
 `rab-ca run --port=9999`
 
+Depending on your Rally configuration, an API key might be required in order to load the Rally SDK and make calls to the Rally server.
+
+[Generate an API Key here](https://rally1.rallydev.com/login)
+
+Then place it in a `.env` file like so:
+
+`API_KEY=_abcd1234`
+
+and make sure `.env` is in your `.gitignore`!
+
 ### watch
 `rab-ca watch [--templates] [--ci]`
 
 The watch command listens for changes to app files and automatically rebuilds the app.
 If the optional `--ci` flag is passed the tests will also be run.
-
-### test
-`rab-ca test [--debug] [--spec]`
-
-The test command runs the tests.  By default all tests will be run headlessly.
-If the `--debug` flag is specified the tests will be run in the default browser instead.
-If the `--spec` flag is specified only the test(s) matching the specified file pattern will be run.
-
-The [Testing Apps](https://help.rallydev.com/apps/2.1/doc/#!/guide/testing_apps) guide in the App SDK help documentation is a great resource to learn how to get started writing tests for your apps.

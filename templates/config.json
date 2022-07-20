@@ -1,15 +1,9 @@
 {
-    "name": "{{name}}",
-    "className": "CustomApp",
-    "server": "{{{server}}}",
-    "sdk": "{{sdk_version}}",
-    "javascript": [
-        "node_modules/@customagile/ancestor-pi-multi-level-pi-app-filter/index.js",
-        "App.js"
-    ],
-    "css": [
-        "node_modules/@customagile/ancestor-pi-multi-level-pi-app-filter/index.css",
-        "app.css"
-    ],
-    "templates": "./templates"
+  "name": "{{name}}",
+  "className": "CustomApp",
+  "server": "{{{server}}}",
+  "sdk": "{{sdk_version}}",
+  "javascript": ["App.js"],
+  "css": ["app.css"],
+  "templates": "./templates"
 }

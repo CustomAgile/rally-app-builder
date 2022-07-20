@@ -2,8 +2,11 @@
   "name": "{{packageName}}",
   "version": "0.1.1",
   "private": true,
+  "scripts": {
+    "run": "rab-ca run",
+    "watch": "rab-ca watch",
+    "build": "rab-ca build"
+  },
   "repository": "",
-  "dependencies": {
-    "@customagile/ancestor-pi-multi-level-pi-app-filter": "git+https://github.com/CustomAgile/utils-ancestor-pi-app-filter.git"
-  }
+  "dependencies": {}
 }

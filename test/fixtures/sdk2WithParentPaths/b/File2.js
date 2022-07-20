@@ -1,2 +1,0 @@
-Ext.define('File2', {});
-

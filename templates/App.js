@@ -10,22 +10,6 @@ Ext.define('CustomApp', {
     config: { defaultSettings: {} },
 
     items: [{
-        id: Utils.AncestorPiAppFilter.RENDER_AREA_ID,
-        xtype: 'container',
-        layout: {
-            type: 'hbox',
-            align: 'middle',
-            defaultMargins: 5,
-        }
-    }, {
-        id: Utils.AncestorPiAppFilter.PANEL_RENDER_AREA_ID,
-        xtype: 'container',
-        layout: {
-            type: 'hbox',
-            align: 'middle',
-            defaultMargins: 5,
-        }
-    }, {
         id: 'mainContainer',
         xtype: 'container',
         layout: {
@@ -35,45 +19,16 @@ Ext.define('CustomApp', {
         }
     }],
 
-    launch: function () {
+    launch() {
         Rally.data.wsapi.Proxy.superclass.timeout = 180000;
-        this.addFilters();
-    },
-
-    // Multi-level filters may not be necessary. If so, remove this code as well as
-    // the dependency in package.json then run `npm update` to remove from the project
-    addFilters() {
-        this.ancestorFilterPlugin = Ext.create('Utils.AncestorPiAppFilter', {
-            ptype: 'UtilsAncestorPiAppFilter',
-            pluginId: 'ancestorFilterPlugin',
-            settingsConfig: { labelWidth: 225 },
-            displayMultiLevelFilter: true,
-            visibleTab: 'HierarchicalRequirement',
-            projectScope: 'user',
-            listeners: {
-                scope: this,
-                ready(plugin) {
-                    plugin.addListener({
-                        scope: this,
-                        select: this.update,
-                        change: this.update
-                    });
-
-                    this.update();
-                },
-            }
-        });
-
-        this.addPlugin(this.ancestorFilterPlugin);
     },
 
     async update() {
-        this.setLoading('Loading Filters...');
+        this.setLoading(true);
         this.down('#mainContainer').removeAll();
 
         try {
-            let filters = await this.ancestorFilterPlugin.getAllFiltersForType('HierarchicalRequirement', true);
-            console.log(filters);
+            console.log();
         } catch (e) {
             this.showError(e);
             this.setLoading(false);
@@ -120,10 +75,9 @@ Ext.define('CustomApp', {
         if (e.exception && e.error && e.error.errors && e.error.errors.length) {
             if (e.error.errors[0].length) {
                 return e.error.errors[0];
-            } else {
-                if (e.error && e.error.response && e.error.response.status) {
-                    return `${defaultMessage} (Status ${e.error.response.status})`;
-                }
+            }
+            if (e.error && e.error.response && e.error.response.status) {
+                return `${defaultMessage} (Status ${e.error.response.status})`;
             }
         }
         if (e.exceptions && e.exceptions.length && e.exceptions[0].error) {
