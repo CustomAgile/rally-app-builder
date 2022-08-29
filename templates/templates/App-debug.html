@@ -12,6 +12,25 @@
     {{/remote_javascript_files}}
 
     <script type="text/javascript">
+        Ext.override(Rally.ui.DateField, {
+            applyState: function(state) {
+                if (state.value) {
+                    this.setValue(new Date(state.value));
+                }
+            }
+        });
+
+        Ext.override(Ext.form.field.Checkbox, {
+            getState: function() {
+                return { checked: this.getValue() };
+            },
+            applyState: function(state) {
+                if (typeof state.checked === "boolean") {
+                    this.setValue(state.checked);
+                }
+            }
+        });
+
         // This override allows us to manually set the security token if the 
         // user has provided an API Key in a .env file
         Ext.override('Rally.sdk.env.Global', {
