@@ -5,7 +5,7 @@
     <!--  Build Date: {{newDate}} -->
     <!--  Version: "{{version}}"-->
     <!--  Repository: "{{{repository}}}"-->
-    <script type="text/javascript" src="{{{server}}}/apps/{{{sdk}}}/sdk-debug.js"></script>
+    <script type="text/javascript" src="{{{server}}}/apps/{{{sdk}}}/sdk-debug.js?apiKey={{{apiKey}}}"></script>
     {{#remote_javascript_files}}
     <script type="text/javascript" src="{{{.}}}"></script>
     {{/remote_javascript_files}}
@@ -27,6 +27,16 @@
                 if (typeof state.checked === "boolean") {
                     this.setValue(state.checked);
                 }
+            }
+        });
+
+        // Bug in the SDK when clearing a combobox, it does't clear the value but saves a non-existing record
+        Ext.override(Ext.form.field.ComboBox, {
+            select: function (r) {
+                if (r && !r.get('ObjectID') && r.get('_uuidRef') === '/allowedattributevalue/') {
+                return;
+                }
+                this.callParent(arguments);
             }
         });
 
@@ -55,11 +65,37 @@
                         this._applyDefaultSettingsAndLaunch
                     ], this);
                 } else {
-                    // Fix is here. Put the call to _applyDefaultSettingsAndLaunch in an onReady function
+                    // Fix is here. Wrap everything in an onReady function
                     Rally.onReady(() => {
-                        this._applyDefaultSettingsAndLaunch({});
+                        if(this.stateful && !this.stateId) {
+                            this.stateId = this.getContext().getScopedStateId('appState');
+                        }
+                        Deft.Chain.pipeline([
+                            this._loadScope,
+                            this._loadSettings,
+                            this._applyDefaultSettingsAndLaunch
+                        ], this);
                     });
                 }
+            }
+        });
+
+        // When embedding an app in an iframe, an error is thrown trying to access
+        // window.parent and window.top. Catch this to ensure proper operation
+        Ext.override(Rally.sdk.env.Global, {
+            _getRallyEnvironment: function () {
+                var rallyEnvironment = null;
+
+                try {
+                    Ext.each([window.parent, window.top], function (w) {
+                        if (w && w !== window && w.Rally && w.Rally.environment) {
+                            rallyEnvironment = w.Rally.environment;
+                            return false;
+                        }
+                    });
+                } catch (e) {}
+
+                return rallyEnvironment;
             }
         });
 
