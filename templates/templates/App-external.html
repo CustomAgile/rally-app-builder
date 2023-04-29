@@ -40,6 +40,23 @@
             }
         });
 
+        // Remove default resize state event. It causes issues with stateful comboboxes
+        Ext.override(Ext.AbstractComponent, {
+            constructor: function () {
+                this.callParent(arguments);
+
+                if (this.stateful && this.getStateId()) {
+                    const stateEventsByName = this.stateEventsByName || {};
+                    const stateEvents = this.stateEvents || [];
+
+                    if (stateEventsByName['resize'] && !stateEvents.includes('resize')) {
+                        delete stateEventsByName['resize'];
+                        this.un('resize', this.onStateChange, this);
+                    }
+                }
+            }
+      });
+
         // This override resolves an issue when loading an app externally. The SDK launches the custom
         // app before Rally.environment has finished initializing, resulting in errors
         Ext.override(Rally.app.App, {

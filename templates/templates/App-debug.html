@@ -80,6 +80,23 @@
             }
         });
 
+        // Remove default resize state event. It causes issues with stateful comboboxes
+        Ext.override(Ext.AbstractComponent, {
+            constructor: function () {
+                this.callParent(arguments);
+
+                if (this.stateful && this.getStateId()) {
+                    const stateEventsByName = this.stateEventsByName || {};
+                    const stateEvents = this.stateEvents || [];
+
+                    if (stateEventsByName['resize'] && !stateEvents.includes('resize')) {
+                        delete stateEventsByName['resize'];
+                        this.un('resize', this.onStateChange, this);
+                    }
+                }
+            }
+      });
+
         // When embedding an app in an iframe, an error is thrown trying to access
         // window.parent and window.top. Catch this to ensure proper operation
         Ext.override(Rally.sdk.env.Global, {
