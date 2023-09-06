@@ -8,5 +8,6 @@
     "build": "rab-ca build"
   },
   "repository": "",
-  "dependencies": {}
+  "dependencies": {},
+  "type": "module"
 }

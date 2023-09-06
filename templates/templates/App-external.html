@@ -30,7 +30,7 @@
             }
         });
 
-        // Bug in the SDK when clearing a combobox, it does't clear the value but saves a non-existing record
+        // Bug in the SDK when clearing a combobox, it doesn't clear the value but saves a non-existing record
         Ext.override(Ext.form.field.ComboBox, {
             select: function (r) {
                 if (r && !r.get('ObjectID') && r.get('_uuidRef') === '/allowedattributevalue/') {

@@ -1,5 +1,5 @@
-let yargs = require('yargs');
-let RallyAppBuilder = require("../lib/");
+import yargs from 'yargs/yargs';
+import RallyAppBuilder from '../lib/index.js';
 
 let errorHandler = function (error) {
   if (error) {
@@ -22,18 +22,15 @@ let init = function (args) {
   let sdk_version = args._[2] || sdk;
   server = args._[3] || server;
   console.log('** Creating a new App **');
-  return RallyAppBuilder.init(
-    { name, sdk_version, server, templates },
-    function (error) {
-      if (error) {
-        return errorHandler(error);
-      } else {
-        console.log('Initialization complete. Run "npm install" and "rab-ca build" to complete the process');
-        return;
-      }
-    });
+  return RallyAppBuilder.init({ name, sdk_version, server, templates }, function (error) {
+    if (error) {
+      return errorHandler(error);
+    } else {
+      console.log('Initialization complete. Run "npm install" and "rab-ca build" to complete the process');
+      return;
+    }
+  });
 };
-
 
 let watch = function (args) {
   let { templates } = args;
@@ -46,41 +43,29 @@ let run = function (args) {
   return RallyAppBuilder.run({ port });
 };
 
-let test = function (args) {
-  let { debug, spec } = args;
-  return RallyAppBuilder.test({ debug, spec });
-};
-
-yargs
+yargs(process.argv.slice(2))
   .command(
     'init',
-    'Creates a new Rally App project template.', {
-    name: { alias: 'n', describe: 'The name of the app' },
-    sdk: { alias: 's', describe: 'The SDK version to target', default: '2.1' },
-    server: { alias: 'r', describe: 'The server to target' },
-    templates: { alias: 't', describe: 'The path containing custom html output templates (advanced)' }
-  }
-    , init
+    'Creates a new Rally App project template.',
+    {
+      name: { alias: 'n', describe: 'The name of the app' },
+      sdk: { alias: 's', describe: 'The SDK version to target', default: '2.1' },
+      server: { alias: 'r', describe: 'The server to target' },
+      templates: { alias: 't', describe: 'The path containing custom html output templates (advanced)' }
+    },
+    init
   )
-  .command(
-    'build',
-    'Builds the current App.',
-    { templates: { alias: 't', describe: 'The path containing custom html output templates (advanced)' } }
-    , build
-  )
+  .command('build', 'Builds the current App.', { templates: { alias: 't', describe: 'The path containing custom html output templates (advanced)' } }, build)
   .command(
     'watch',
-    'Watch the current app files for changes and automatically rebuild it.', {
-    templates: { alias: 't', describe: 'The path containing custom html output templates (advanced)' }
-  },
+    'Watch the current app files for changes and automatically rebuild it.',
+    {
+      templates: { alias: 't', describe: 'The path containing custom html output templates (advanced)' }
+    },
     watch
   )
-  .command(
-    'run',
-    'Start a local server and launch the current app in the default browser.',
-    { port: { alias: 'p', default: 1337, describe: 'The port on which to start the local http server' } }
-    , run
-  )
-  .help().alias('h', 'help')
-  .version().alias('v', 'version')
-  .argv;
+  .command('run', 'Start a local server and launch the current app in the default browser.', { port: { alias: 'p', default: 1337, describe: 'The port on which to start the local http server' } }, run)
+  .help()
+  .alias('h', 'help')
+  .version()
+  .alias('v', 'version').argv;
