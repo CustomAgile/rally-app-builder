@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <title>{{name}}</title>
     <!--  Build Date: {{newDate}} -->
     <!--  Version: "{{version}}"-->
@@ -11,6 +11,43 @@
     {{/remote_javascript_files}}
 
     <script type="text/javascript">
+        // Fixes issue where custom apps refresh when the user clicks on a work item link to view its details
+        Ext.override(Rally.nav.Manager, {
+            getDetailHash: function (record, options) {
+                options = options || {};
+
+                var ref = Rally.util.Ref.getRefUri(record);
+
+                if (!Rally.util.Ref.isRefUri(ref)) {
+                    return null;
+                }
+
+                var refItem = Rally.util.Ref.getRefObject(ref),
+                    refType = refItem.getType();
+
+                if (refType === 'testfolder') {
+                    return null;
+                }
+
+                var oid = refItem.getOid(),
+                    info = (refType ? Rally.util.TypeInfo.getTypeInfoByName(refType) : null) || {},
+                    alias = info.alias,
+                    suffix = info.detailSlugSuffix,
+                    prettyType = alias || refType.toLowerCase(),
+                    scopePath = '/' + Rally.environment.getContext().getScopeStr(options.projectOid || this._determineProjectOidForLink(record, options)),
+                    hash = oid && prettyType ? scopePath + '/detail/' + prettyType + '/' + oid + (suffix || '') : null;
+
+                if (hash && options.subPage) {
+                    hash += '/' + options.subPage;
+                }
+
+                if (window.parent && window.parent.Churro && window.parent.Churro.rewriteDetailHash) {
+                    return window.parent.Churro.rewriteDetailHash(hash);
+                }
+                return hash;
+            }
+        });
+
          Ext.override(Rally.ui.DateField, {
             applyState: function(state) {
                 if (state.value) {
@@ -56,8 +93,8 @@
                 }
             }
       });
-        
-        Rally.onReady(function () {
+
+      Rally.onReady(function () {
             {{#javascript_files}}
                 {{{.}}}
             {{/javascript_files}}
@@ -72,18 +109,17 @@
     </script>
 
     {{#remote_css_files}}
-    <link rel="stylesheet" type="text/css" href="{{{.}}}"/>
-    {{/remote_css_files}}
-
+    <link rel="stylesheet" type="text/css" href="{{{.}}}" />
+    {{/remote_css_files}} 
     {{#css_files}}
     <style type="text/css">
-        {{{.}}}
+      {{{.}}}
     </style>
     {{/css_files}}
-</head>
-<body>
-{{#html_files}}
+  </head>
+  <body>
+    {{#html_files}} 
     {{{.}}}
-{{/html_files}}
-</body>
+    {{/html_files}}
+  </body>
 </html>

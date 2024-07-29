@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <title>{{name}}</title>
     <!--  Build Date: {{newDate}} -->
     <!--  Version: "{{version}}"-->
@@ -11,68 +11,94 @@
     {{/remote_javascript_files}}
 
     <script type="text/javascript">
-         Ext.override(Rally.ui.DateField, {
-            applyState: function(state) {
-                if (state.value) {
-                    this.setValue(new Date(state.value));
+                // Fixes issue where custom apps refresh when the user clicks on a work item link to view its details
+      Ext.override(Rally.nav.Manager, {
+                getDetailHash: function (record, options) {
+                    options = options || {};
+
+                    var ref = Rally.util.Ref.getRefUri(record);
+
+                    if (!Rally.util.Ref.isRefUri(ref)) {
+                        return null;
+                    }
+
+                    var refItem = Rally.util.Ref.getRefObject(ref),
+                        refType = refItem.getType();
+
+                    if (refType === 'testfolder') {
+                        return null;
+                    }
+
+                    var oid = refItem.getOid(),
+                        info = (refType ? Rally.util.TypeInfo.getTypeInfoByName(refType) : null) || {},
+                        alias = info.alias,
+                        suffix = info.detailSlugSuffix,
+                        prettyType = alias || refType.toLowerCase(),
+                        scopePath = '/' + Rally.environment.getContext().getScopeStr(options.projectOid || this._determineProjectOidForLink(record, options)),
+                        hash = oid && prettyType ? scopePath + '/detail/' + prettyType + '/' + oid + (suffix || '') : null;
+
+                    if (hash && options.subPage) {
+                        hash += '/' + options.subPage;
+                    }
+
+                    if (window.parent && window.parent.Churro && window.parent.Churro.rewriteDetailHash) {
+                        return window.parent.Churro.rewriteDetailHash(hash);
+                    }
+                    return hash;
                 }
-            }
-        });
+            });
 
-        Ext.override(Ext.form.field.Checkbox, {
-            getState: function() {
-                return { checked: this.getValue() };
-            },
-            applyState: function(state) {
-                if (typeof state.checked === "boolean") {
-                    this.setValue(state.checked);
-                }
-            }
-        });
-
-        // Bug in the SDK when clearing a combobox, it doesn't clear the value but saves a non-existing record
-        Ext.override(Ext.form.field.ComboBox, {
-            select: function (r) {
-                if (r && !r.get('ObjectID') && r.get('_uuidRef') === '/allowedattributevalue/') {
-                return;
-                }
-                this.callParent(arguments);
-            }
-        });
-
-        // Remove default resize state event. It causes issues with stateful comboboxes
-        Ext.override(Ext.AbstractComponent, {
-            constructor: function () {
-                this.callParent(arguments);
-
-                if (this.stateful && this.getStateId()) {
-                    const stateEventsByName = this.stateEventsByName || {};
-                    const stateEvents = this.stateEvents || [];
-
-                    if (stateEventsByName['resize'] && !stateEvents.includes('resize')) {
-                        delete stateEventsByName['resize'];
-                        this.un('resize', this.onStateChange, this);
+             Ext.override(Rally.ui.DateField, {
+                applyState: function(state) {
+                    if (state.value) {
+                        this.setValue(new Date(state.value));
                     }
                 }
-            }
-      });
+            });
 
-        // This override resolves an issue when loading an app externally. The SDK launches the custom
-        // app before Rally.environment has finished initializing, resulting in errors
-        Ext.override(Rally.app.App, {
-            loadSettingsAndLaunch: function () {
-                if(this.getAppId()) {
-                    if(this.stateful && !this.stateId) {
-                        this.stateId = this.getContext().getScopedStateId('appState');
+            Ext.override(Ext.form.field.Checkbox, {
+                getState: function() {
+                    return { checked: this.getValue() };
+                },
+                applyState: function(state) {
+                    if (typeof state.checked === "boolean") {
+                        this.setValue(state.checked);
                     }
-                    Deft.Chain.pipeline([
-                        this._loadScope,
-                        this._loadSettings,
-                        this._applyDefaultSettingsAndLaunch
-                    ], this);
-                } else {
-                    // Fix is here. Wrap everything in an onReady function
-                    Rally.onReady(() => {
+                }
+            });
+
+            // Bug in the SDK when clearing a combobox, it doesn't clear the value but saves a non-existing record
+            Ext.override(Ext.form.field.ComboBox, {
+                select: function (r) {
+                    if (r && !r.get('ObjectID') && r.get('_uuidRef') === '/allowedattributevalue/') {
+                    return;
+                    }
+                    this.callParent(arguments);
+                }
+            });
+
+            // Remove default resize state event. It causes issues with stateful comboboxes
+            Ext.override(Ext.AbstractComponent, {
+                constructor: function () {
+                    this.callParent(arguments);
+
+                    if (this.stateful && this.getStateId()) {
+                        const stateEventsByName = this.stateEventsByName || {};
+                        const stateEvents = this.stateEvents || [];
+
+                        if (stateEventsByName['resize'] && !stateEvents.includes('resize')) {
+                            delete stateEventsByName['resize'];
+                            this.un('resize', this.onStateChange, this);
+                        }
+                    }
+                }
+          });
+
+            // This override resolves an issue when loading an app externally. The SDK launches the custom
+            // app before Rally.environment has finished initializing, resulting in errors
+            Ext.override(Rally.app.App, {
+                loadSettingsAndLaunch: function () {
+                    if(this.getAppId()) {
                         if(this.stateful && !this.stateId) {
                             this.stateId = this.getContext().getScopedStateId('appState');
                         }
@@ -81,57 +107,64 @@
                             this._loadSettings,
                             this._applyDefaultSettingsAndLaunch
                         ], this);
-                    });
+                    } else {
+                        // Fix is here. Wrap everything in an onReady function
+                        Rally.onReady(() => {
+                            if(this.stateful && !this.stateId) {
+                                this.stateId = this.getContext().getScopedStateId('appState');
+                            }
+                            Deft.Chain.pipeline([
+                                this._loadScope,
+                                this._loadSettings,
+                                this._applyDefaultSettingsAndLaunch
+                            ], this);
+                        });
+                    }
                 }
-            }
-        });
-
-        // When embedding an app in an iframe, an error is thrown trying to access
-        // window.parent and window.top. Catch this to ensure proper operation
-        Ext.override(Rally.sdk.env.Global, {
-            _getRallyEnvironment: function () {
-                var rallyEnvironment = null;
-
-                try {
-                    Ext.each([window.parent, window.top], function (w) {
-                        if (w && w !== window && w.Rally && w.Rally.environment) {
-                            rallyEnvironment = w.Rally.environment;
-                            return false;
-                        }
-                    });
-                } catch (e) {}
-
-                return rallyEnvironment;
-            }
-        });
-        
-        Rally.onReady(function () {
-            {{#javascript_files}}
-                {{{.}}}
-            {{/javascript_files}}
-
-            Rally.launchApp('{{className}}', {
-                name:"{{name}}",
-                parentRepos:"{{{parents}}}",
-                version:"{{version}}"
             });
 
-        });
+            // When embedding an app in an iframe, an error is thrown trying to access
+            // window.parent and window.top. Catch this to ensure proper operation
+            Ext.override(Rally.sdk.env.Global, {
+                _getRallyEnvironment: function () {
+                    var rallyEnvironment = null;
+
+                    try {
+                        Ext.each([window.parent, window.top], function (w) {
+                            if (w && w !== window && w.Rally && w.Rally.environment) {
+                                rallyEnvironment = w.Rally.environment;
+                                return false;
+                            }
+                        });
+                    } catch (e) {}
+
+                    return rallyEnvironment;
+                }
+            });
+
+            Rally.onReady(function () {
+                {{#javascript_files}}
+                    {{{.}}}
+                {{/javascript_files}}
+
+                Rally.launchApp('{{className}}', {
+                    name:"{{name}}",
+                    parentRepos:"{{{parents}}}",
+                    version:"{{version}}"
+                });
+
+            });
     </script>
 
     {{#remote_css_files}}
-    <link rel="stylesheet" type="text/css" href="{{{.}}}"/>
-    {{/remote_css_files}}
-
-    {{#css_files}}
+    <link rel="stylesheet" type="text/css" href="{{{.}}}" />
+    {{/remote_css_files}} {{#css_files}}
     <style type="text/css">
-        {{{.}}}
+      {{{.}}}
     </style>
     {{/css_files}}
-</head>
-<body>
-{{#html_files}}
-    {{{.}}}
-{{/html_files}}
-</body>
+  </head>
+  <body>
+    {{#html_files}} {{{.}}} {{/html_files}}
+  </body>
 </html>

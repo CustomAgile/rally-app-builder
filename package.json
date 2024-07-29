@@ -2,7 +2,7 @@
   "author": "Custom Agile",
   "name": "rally-app-builder-ca",
   "description": "A node module that assists in the building of Rally Apps",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "homepage": "https://github.com/CustomAgile/rally-app-builder",
   "repository": {
     "type": "git",
